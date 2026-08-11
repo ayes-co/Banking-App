@@ -61,3 +61,58 @@ export async function requestTransaction(payload) {
     amount: numericAmount,
   }
 }
+
+export async function approveTransaction(transactionId, approverRole) {
+  if (!db || !transactionId) return null
+
+  try {
+    const txRef = doc(db, FIRESTORE_COLLECTIONS.TRANSACTIONS, transactionId)
+    const txSnap = await getDoc(txRef)
+    if (!txSnap.exists()) return null
+    const tx = txSnap.data()
+    const amount = Number(tx.amount) || 0
+    const customerId = tx.userId
+
+    await updateDoc(txRef, {
+      status: 'Approved',
+      approvedBy: approverRole,
+      approvedAt: serverTimestamp(),
+    })
+
+    // Apply balance change: deposits add, withdrawals subtract
+    if (tx.type && customerId) {
+      if (String(tx.type).toLowerCase() === 'deposit') {
+        await updateCustomerBalance(customerId, amount)
+      } else if (String(tx.type).toLowerCase() === 'withdrawal') {
+        await updateCustomerBalance(customerId, -Math.abs(amount))
+      }
+    }
+
+    return { id: transactionId, ...tx, status: 'Approved' }
+  } catch (error) {
+    console.error('Unable to approve transaction:', error)
+    return null
+  }
+}
+
+export async function rejectTransaction(transactionId, approverRole) {
+  if (!db || !transactionId) return null
+
+  try {
+    const txRef = doc(db, FIRESTORE_COLLECTIONS.TRANSACTIONS, transactionId)
+    const txSnap = await getDoc(txRef)
+    if (!txSnap.exists()) return null
+    const tx = txSnap.data()
+
+    await updateDoc(txRef, {
+      status: 'Rejected',
+      approvedBy: approverRole,
+      approvedAt: serverTimestamp(),
+    })
+
+    return { id: transactionId, ...tx, status: 'Rejected' }
+  } catch (error) {
+    console.error('Unable to reject transaction:', error)
+    return null
+  }
+}

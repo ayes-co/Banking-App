@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import DashboardShell from '../../components/DashboardShell.jsx'
-import { getTransactions } from '../../services/transactionService.js'
+import { getTransactions, approveTransaction, rejectTransaction } from '../../services/transactionService.js'
 
 const navItems = [
   { to: '/manager', icon: 'DB', label: 'Dashboard' },
@@ -26,6 +26,7 @@ const normalizeStatus = (status) => {
 export default function TransactionOversight() {
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [processingId, setProcessingId] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -87,7 +88,57 @@ export default function TransactionOversight() {
                       {item.date || '—'}
                     </small>
                   </div>
-                  <span className={`badge ${status.toLowerCase()}`}>{status}</span>
+                  {status === 'Pending' ? (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{ minHeight: '36px', padding: '0 16px', width: 'auto' }}
+                        disabled={processingId === item.id}
+                        onClick={async () => {
+                          setProcessingId(item.id)
+                          try {
+                            await approveTransaction(item.id, 'manager')
+                            const data = await getTransactions()
+                            setTransactions(data)
+                          } catch (error) {
+                            console.error('Failed to approve transaction:', error)
+                          } finally {
+                            setProcessingId(null)
+                          }
+                        }}
+                      >
+                        {processingId === item.id ? '...' : 'Approve'}
+                      </button>
+                      <button
+                        type="button"
+                        className="primary-button"
+                        style={{
+                          minHeight: '36px',
+                          padding: '0 16px',
+                          width: 'auto',
+                          background: 'linear-gradient(135deg, #7f1d1d, #b91c1c)',
+                        }}
+                        disabled={processingId === item.id}
+                        onClick={async () => {
+                          setProcessingId(item.id)
+                          try {
+                            await rejectTransaction(item.id, 'manager')
+                            const data = await getTransactions()
+                            setTransactions(data)
+                          } catch (error) {
+                            console.error('Failed to reject transaction:', error)
+                          } finally {
+                            setProcessingId(null)
+                          }
+                        }}
+                      >
+                        {processingId === item.id ? '...' : 'Reject'}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className={`badge ${status.toLowerCase()}`}>{status}</span>
+                  )}
                 </div>
               )
             })}

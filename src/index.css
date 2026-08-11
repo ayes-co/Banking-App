@@ -72,19 +72,6 @@ button {
     radial-gradient(circle at 84% 22%, rgba(16, 185, 129, 0.08), transparent 14%);
 }
 
-.app-shell::after {
-  content: '';
-  position: absolute;
-  left: 6%;
-  bottom: 12%;
-  width: 240px;
-  height: 240px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(49, 94, 255, 0.14), transparent 58%);
-  filter: blur(28px);
-  pointer-events: none;
-  z-index: 0;
-}
 
 .app-sidebar {
   position: sticky;
@@ -276,18 +263,6 @@ button {
   box-shadow: 0 28px 72px rgba(15, 36, 70, 0.12);
   border: 1px solid rgba(229, 236, 246, 0.85);
   overflow: hidden;
-}
-
-.dashboard-content::before {
-  content: '';
-  position: absolute;
-  right: 28px;
-  top: 20px;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(49, 94, 255, 0.14), transparent 62%);
-  pointer-events: none;
 }
 
 .page-heading {
