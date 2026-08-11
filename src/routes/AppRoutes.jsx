@@ -33,8 +33,10 @@ function DashboardRedirect() {
 }
 
 export default function AppRoutes() {
+  const base = import.meta.env.BASE_URL || '/'
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={base}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
