@@ -34,9 +34,11 @@ function DashboardRedirect() {
 
 export default function AppRoutes() {
   const base = import.meta.env.BASE_URL || '/'
+  // If the build uses a relative base ('./'), BrowserRouter should use root basename
+  const routerBase = base === './' ? '/' : base
 
   return (
-    <BrowserRouter basename={base}>
+    <BrowserRouter basename={routerBase}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
